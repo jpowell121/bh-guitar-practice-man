@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function DashboardPage() {
     const session = await getIronSession<SessionData>(
@@ -23,11 +24,12 @@ export default async function DashboardPage() {
                     Ready to practice?
                 </p>
 
-                <div className="bg-surface rounded-2xl shadow-sm border border-border p-6">
-                    <p className="text-text-muted text-center">
-                        Your practice dashboard is coming soon.
-                    </p>
-                </div>
+                <Link
+                    href="/setup"
+                    className="block w-full bg-primary hover:bg-primary-hover text-white text-center rounded-2xl py-4 text-lg font-medium transition-colors"
+                >
+                    Start an Exercise
+                </Link>
             </div>
         </main>
     );

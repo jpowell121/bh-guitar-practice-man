@@ -23,11 +23,17 @@ model PracticeSession {
   userId       Int
   user         User         @relation(fields: [userId], references: [id])
   key          MusicKey
+  position     Position
   scale        Scale
   exerciseType ExerciseType
   tempo        Int?
   score        Int
   createdAt    DateTime     @default(now())
+}
+
+enum Position {
+  SixthStringRoot
+  FifthStringRoot
 }
 
 enum MusicKey {
