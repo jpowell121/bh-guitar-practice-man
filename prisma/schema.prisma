@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id            Int               @id @default(autoincrement())
+  email         String            @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  sessions      PracticeSession[]
+}
+
+model PracticeSession {
+  id           Int          @id @default(autoincrement())
+  userId       Int
+  user         User         @relation(fields: [userId], references: [id])
+  key          MusicKey
+  scale        Scale
+  exerciseType ExerciseType
+  tempo        Int?
+  score        Int
+  createdAt    DateTime     @default(now())
+}
+
+enum MusicKey {
+  C
+  Db
+  D
+  Eb
+  E
+  F
+  Gb
+  G
+  Ab
+  A
+  Bb
+  B
+}
+
+enum Scale {
+  Major
+  Dominant
+  Minor6thDiminished
+}
+
+enum ExerciseType {
+  Scale
+  Thirds
+  Triads
+  Chords
+}
