@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 const KEYS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 const SCALES = ["Major", "Dominant", "Minor 6th Diminished"];
-const EXERCISE_TYPES = ["Scale", "Thirds", "Triads", "Chords"];
+const EXERCISE_TYPES = ["Scale", "Thirds", "Triads", "Chords", "Pivots"];
 const POSITIONS = ["6th String Root", "5th String Root"];
 
 export default function NewPracticePage() {

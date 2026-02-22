@@ -19,16 +19,17 @@ model User {
 }
 
 model PracticeSession {
-  id           Int          @id @default(autoincrement())
-  userId       Int
-  user         User         @relation(fields: [userId], references: [id])
-  key          MusicKey
-  position     Position
-  scale        Scale
-  exerciseType ExerciseType
-  tempo        Int?
-  score        Int
-  createdAt    DateTime     @default(now())
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  user          User         @relation(fields: [userId], references: [id])
+  key           MusicKey
+  position      Position
+  scale         Scale
+  exerciseType  ExerciseType
+  showFretboard Boolean @default(false)
+  tempo         Int?
+  score         Int
+  createdAt     DateTime     @default(now())
 }
 
 enum Position {
@@ -62,4 +63,5 @@ enum ExerciseType {
   Thirds
   Triads
   Chords
+  Pivots
 }
