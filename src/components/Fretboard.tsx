@@ -216,23 +216,23 @@ export default function Fretboard({
                           strokeWidth={STRING_THICKNESSES[s - 1]} opacity="0.9" />
                 ))}
 
-                {/* Dots */}
-                {visibleDots.map((dot, idx) => {
-                    if (!dot.active) return null;
-                    const x = stringX(dot.string);
-                    const y = dot.fret === 0 ? MARGIN_TOP - 4 : fretToY(dot.fret) - fretSpacing / 2;
-                    const r = 14;
+                {/* Notes */}
+                {visibleDots.map((note, idx) => {
+                    if (!note.active) return null;
+                    const x = stringX(note.string);
+                    const y = note.fret === 0 ? MARGIN_TOP - 4 : fretToY(note.fret) - fretSpacing / 2;
+                    const r = 18;
                     return (
-                        <g key={`dot-${idx}`}>
+                        <g key={`note-${idx}`}>
                             <circle cx={x + 1} cy={y + 2} r={r} fill="#000000" opacity="0.25" />
-                            <circle cx={x} cy={y} r={r} fill={dot.root ? "url(#rootDotGrad)" : `url(#${regDotId})`} />
+                            <circle cx={x} cy={y} r={r} fill={note.root ? "url(#rootDotGrad)" : `url(#${regDotId})`} />
                             <circle cx={x} cy={y} r={r} fill="url(#dotGlow)" />
-                            <circle cx={x} cy={y} r={r} fill="none" stroke={dot.root ? "#2A7F7F" : cfg.dotBorder} strokeWidth="1.5" opacity="0.8" />
-                            {showLabels && dot.label && (
+                            <circle cx={x} cy={y} r={r} fill="none" stroke={note.root ? "#2A7F7F" : cfg.dotBorder} strokeWidth="1.5" opacity="0.8" />
+                            {showLabels && note.label && (
                                 <text x={x} y={y + 4} textAnchor="middle"
-                                      fontSize={dot.label.length > 2 ? "9" : "11"} fontWeight="700"
-                                      fill={dot.root ? "#FFFFFF" : cfg.dotTextColor} fontFamily="monospace">
-                                    {dot.label}
+                                      fontSize={note.label.length > 2 ? "9" : "11"} fontWeight="700"
+                                      fill={note.root ? "#FFFFFF" : cfg.dotTextColor} fontFamily="monospace">
+                                    {note.label}
                                 </text>
                             )}
                         </g>
