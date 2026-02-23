@@ -1,29 +1,27 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
-import Fretboard, { FretDot, WoodType } from "@/components/Fretboard";
+import { Suspense, useState, useEffect } from "react";
+import Fretboard, { Note, WoodType } from "@/components/Fretboard";
 
-const TEST_DOTS: FretDot[] = [
-    { string: 6, fret: 8,  label: "C",  active: true,  root: true  },
-    { string: 6, fret: 10, label: "D",  active: true,  root: false },
-    { string: 6, fret: 12, label: "E",  active: true,  root: false },
-    { string: 5, fret: 8,  label: "F",  active: true,  root: false },
-    { string: 5, fret: 10, label: "G",  active: true,  root: false },
-    { string: 5, fret: 12, label: "A",  active: true,  root: false },
-    { string: 4, fret: 9,  label: "B",  active: true,  root: false },
-    { string: 4, fret: 10, label: "C",  active: true,  root: true  },
-    { string: 3, fret: 9,  label: "D",  active: true,  root: false },
-    { string: 3, fret: 10, label: "E",  active: true,  root: false },
-    { string: 2, fret: 8,  label: "F",  active: true,  root: false },
-    { string: 2, fret: 10, label: "G",  active: true,  root: false },
-    { string: 1, fret: 8,  label: "A",  active: true,  root: false },
-    { string: 1, fret: 10, label: "B",  active: true,  root: false },
-];
+function gridToNotes(grid: boolean[][]): Note[] {
+    const notes: Note[] = [];
+    grid.forEach((stringRow, stringIndex) => {
+        stringRow.forEach((active, fretIndex) => {
+            notes.push({
+                string: stringIndex + 1,
+                fret: fretIndex + 1,
+                active,
+                root: false,
+            });
+        });
+    });
+    return notes;
+}
 
 const WOOD_OPTIONS: { value: WoodType; label: string; from: string; to: string }[] = [
     { value: "rosewood", label: "Rosewood", from: "#5C2E08", to: "#3D1C02" },
-    { value: "maple", label: "Maple", from: "#E8A848", to: "#C87830" },
+    { value: "maple",    label: "Maple",    from: "#E8A848", to: "#C87830" },
 ];
 
 function SessionContent() {
@@ -36,8 +34,26 @@ function SessionContent() {
     const bpm = searchParams.get("bpm");
 
     const [showFretboard, setShowFretboard] = useState(true);
-    const [showLabels, setShowLabels] = useState(true);
+    const [showLabels, setShowLabels] = useState(false);
     const [wood, setWood] = useState<WoodType>("rosewood");
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchScale() {
+            try {
+                const res = await fetch(`/api/scales?name=${encodeURIComponent(scale)}`);
+                const data = await res.json();
+                const grid = data.notes_grid as boolean[][];
+                setNotes(gridToNotes(grid));
+            } catch (err) {
+                console.error("Failed to fetch scale", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchScale();
+    }, [scale]);
 
     return (
         <main className="min-h-screen bg-background flex flex-col p-4">
@@ -60,7 +76,7 @@ function SessionContent() {
                     </div>
                 </div>
 
-                {/* Controls row */}
+                {/* Controls */}
                 <div className="flex gap-2">
                     <button
                         onClick={() => setShowFretboard(!showFretboard)}
@@ -117,19 +133,22 @@ function SessionContent() {
                 )}
 
                 {/* Fretboard or placeholder */}
-                {showFretboard ? (
+                {loading ? (
+                    <div className="w-full bg-surface border border-border rounded-2xl flex items-center justify-center"
+                         style={{ aspectRatio: "360/520" }}>
+                        <p className="text-text-muted text-sm">Loading...</p>
+                    </div>
+                ) : showFretboard ? (
                     <Fretboard
-                        dots={TEST_DOTS}
+                        notes={notes}
                         startFret={7}
                         numFrets={5}
                         showLabels={showLabels}
                         wood={wood}
                     />
                 ) : (
-                    <div
-                        className="w-full bg-surface border border-border rounded-2xl flex items-center justify-center"
-                        style={{ aspectRatio: "360/520" }}
-                    >
+                    <div className="w-full bg-surface border border-border rounded-2xl flex items-center justify-center"
+                         style={{ aspectRatio: "360/520" }}>
                         <div className="text-center">
                             <div className="text-5xl mb-3">🎸</div>
                             <p className="text-text-muted text-sm">Play from memory</p>

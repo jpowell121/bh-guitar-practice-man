@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export interface FretDot {
+export interface Note {
     string: number;
     fret: number;
     label?: string;
@@ -13,7 +13,7 @@ export interface FretDot {
 export type WoodType = "rosewood" | "maple";
 
 interface FretboardProps {
-    dots: FretDot[];
+    notes: Note[];
     startFret?: number;
     numFrets?: number;
     showLabels?: boolean;
@@ -40,7 +40,7 @@ const WOOD_CONFIGS = {
         ],
         stringColor: "#C8B89A",
         woundStringColor: "#B0A07A",
-        fretLabelColor: "#C8A87A",
+        fretLabelColor: "#7A6A50",
         stringLabelColor: "#C8A87A",
         dotRegularFrom: "#E8E0D0",
         dotRegularTo: "#B8A888",
@@ -71,7 +71,7 @@ const WOOD_CONFIGS = {
 };
 
 export default function Fretboard({
-                                      dots,
+                                      notes,
                                       startFret = 0,
                                       numFrets = 5,
                                       showLabels = true,
@@ -95,14 +95,10 @@ export default function Fretboard({
 
     const fretSpacing = boardHeight / numFrets;
     const fretY = (f: number) => MARGIN_TOP + f * fretSpacing;
-    const fretToY = (fret: number) => fretY(fret - startFret);
 
     const showNut = startFret === 0;
     const endFret = startFret + numFrets;
     const fretLines = Array.from({ length: numFrets + 1 }, (_, i) => startFret + i);
-    const visibleDots = dots.filter(
-        (d) => d.fret >= startFret && d.fret <= endFret && d.string >= 1 && d.string <= 6
-    );
 
     const cfg = WOOD_CONFIGS[wood];
     const grainId = `fretboardGrain-${wood}`;
@@ -198,11 +194,10 @@ export default function Fretboard({
                 {/* Fret labels */}
                 {fretLines.slice(0, -1).map((fret, i) => {
                     const y = fretY(i) + fretSpacing / 2;
-                    const displayFret = fret + 1;
-                    if (displayFret < 1) return null;
+                    const displayFret = fret;
                     return (
-                        <text key={`fl-${fret}`} x={MARGIN_LEFT - 22} y={y + 5} textAnchor="middle"
-                              fontSize="11" fill={cfg.fretLabelColor} opacity="0.7" fontFamily="monospace">
+                        <text key={`fl-${fret}`} x={MARGIN_LEFT - 30} y={y + 5} textAnchor="middle"
+                              fontSize="11"  transform={`rotate(-90, ${MARGIN_LEFT - 22}, ${y + 5})`} fill={cfg.fretLabelColor} opacity="1.0" fontFamily="monospace">
                             {displayFret}
                         </text>
                     );
@@ -217,10 +212,10 @@ export default function Fretboard({
                 ))}
 
                 {/* Notes */}
-                {visibleDots.map((note, idx) => {
+                {notes.map((note, idx) => {
                     if (!note.active) return null;
                     const x = stringX(note.string);
-                    const y = note.fret === 0 ? MARGIN_TOP - 4 : fretToY(note.fret) - fretSpacing / 2;
+                    const y = fretY(note.fret) - fretSpacing / 2;
                     const r = 18;
                     return (
                         <g key={`note-${idx}`}>
