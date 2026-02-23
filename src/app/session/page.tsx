@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
 import Fretboard, { Note, WoodType } from "@/components/Fretboard";
+import Fretboard2 from "@/components/Fretboard2";
 
 function gridToNotes(grid: boolean[][]): Note[] {
     const notes: Note[] = [];
@@ -45,7 +46,6 @@ function SessionContent() {
                 const res = await fetch(`/api/scales?name=${encodeURIComponent(scale)}`);
                 const data = await res.json();
                 const grid = data.notes_grid as boolean[][];
-                setNotes(gridToNotes(grid));
             } catch (err) {
                 console.error("Failed to fetch scale", err);
             } finally {
@@ -139,11 +139,9 @@ function SessionContent() {
                         <p className="text-text-muted text-sm">Loading...</p>
                     </div>
                 ) : showFretboard ? (
-                    <Fretboard
-                        notes={notes}
-                        startFret={7}
-                        numFrets={5}
-                        showLabels={showLabels}
+                    <Fretboard2
+                        startFret={1}
+                        numFrets={3}
                         wood={wood}
                     />
                 ) : (
