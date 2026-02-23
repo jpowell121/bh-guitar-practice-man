@@ -2,23 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
-import Fretboard, { Note, WoodType } from "@/components/Fretboard";
-import Fretboard2 from "@/components/Fretboard2";
-
-function gridToNotes(grid: boolean[][]): Note[] {
-    const notes: Note[] = [];
-    grid.forEach((stringRow, stringIndex) => {
-        stringRow.forEach((active, fretIndex) => {
-            notes.push({
-                string: stringIndex + 1,
-                fret: fretIndex + 1,
-                active,
-                root: false,
-            });
-        });
-    });
-    return notes;
-}
+import Fretboard, { WoodType } from "@/components/Fretboard";
 
 const WOOD_OPTIONS: { value: WoodType; label: string; from: string; to: string }[] = [
     { value: "rosewood", label: "Rosewood", from: "#5C2E08", to: "#3D1C02" },
@@ -37,23 +21,6 @@ function SessionContent() {
     const [showFretboard, setShowFretboard] = useState(true);
     const [showLabels, setShowLabels] = useState(false);
     const [wood, setWood] = useState<WoodType>("rosewood");
-    const [notes, setNotes] = useState<Note[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchScale() {
-            try {
-                const res = await fetch(`/api/scales?name=${encodeURIComponent(scale)}`);
-                const data = await res.json();
-                const grid = data.notes_grid as boolean[][];
-            } catch (err) {
-                console.error("Failed to fetch scale", err);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchScale();
-    }, [scale]);
 
     return (
         <main className="min-h-screen bg-background flex flex-col p-4">
@@ -133,15 +100,10 @@ function SessionContent() {
                 )}
 
                 {/* Fretboard or placeholder */}
-                {loading ? (
-                    <div className="w-full bg-surface border border-border rounded-2xl flex items-center justify-center"
-                         style={{ aspectRatio: "360/520" }}>
-                        <p className="text-text-muted text-sm">Loading...</p>
-                    </div>
-                ) : showFretboard ? (
-                    <Fretboard2
-                        startFret={1}
-                        numFrets={3}
+                {showFretboard ? (
+                    <Fretboard
+                        startFret={7}
+                        numFrets={5}
                         wood={wood}
                     />
                 ) : (
