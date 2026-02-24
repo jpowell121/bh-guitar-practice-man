@@ -34,7 +34,7 @@ const WOOD_CONFIGS = {
         ],
         stringColor: "#C8B89A",
         woundStringColor: "#B0A07A",
-        fretLabelColor: "#C8A87A",
+        fretLabelColor: "#555555",
         noteRegularFrom: "#E8E0D0",
         noteRegularTo: "#B8A888",
         noteBorder: "#8A7A60",
@@ -53,7 +53,7 @@ const WOOD_CONFIGS = {
         ],
         stringColor: "#8A7A60",
         woundStringColor: "#7A6A50",
-        fretLabelColor: "#A07830",
+        fretLabelColor: "#555555",
         noteRegularFrom: "#6B5A3A",
         noteRegularTo: "#4A3A22",
         noteBorder: "#6B5A3A",
@@ -65,7 +65,7 @@ export default function Fretboard({
                                        numFrets,
                                        wood = "rosewood",
                                        musicKey = "C",
-                                       scaleType = "Min6Dim",
+                                       scaleType = "Major",
                                        enharmonic = "flat",
                                    }: FretboardProps) {
     const SVG_WIDTH = 360;
@@ -82,14 +82,16 @@ export default function Fretboard({
         MARGIN_LEFT + STRING_INSET + (NUM_STRINGS - s) * ((boardWidth - STRING_INSET * 2) / (NUM_STRINGS - 1));
 
     const MAX_FRET = 24;
-    const clampedStart = Math.max(0, Math.min(startFret, MAX_FRET));
-    const clampedFrets = Math.max(1, Math.min(numFrets, MAX_FRET - clampedStart));
+    const hasNut = startFret === 0;
+    let start = Math.max(0, Math.min(startFret, MAX_FRET));
+    let frets = Math.max(1, Math.min(numFrets, MAX_FRET - start));
+    if (hasNut) { start = 1; frets--; }
     const fretSpacing = 88;
-    const boardHeightActual = fretSpacing * clampedFrets;
+    const boardHeightActual = fretSpacing * frets;
     const fretY = (i: number) => MARGIN_TOP + i * fretSpacing;
     const boardCenter = (stringX(1) + stringX(6)) / 2;
 
-    const fretLines = Array.from({ length: clampedFrets + 1 }, (_, i) => i);
+    const fretLines = Array.from({ length: frets + 1 }, (_, i) => i);
     const scaleNotes = generateScale(musicKey, scaleType, enharmonic);
 
     const cfg = WOOD_CONFIGS[wood];
@@ -145,12 +147,12 @@ export default function Fretboard({
                 </defs>
 
                 {/* Background */}
-                <rect x={MARGIN_LEFT - 16} y={MARGIN_TOP - 16} width={boardWidth + 32} height={boardHeightActual + 32} rx="12" ry="12" fill={`url(#${grainId})`} />
+                <rect x={MARGIN_LEFT - 16} y={MARGIN_TOP - 28} width={boardWidth + 32} height={boardHeightActual + 44} rx="12" ry="12" fill={`url(#${grainId})`} />
                 <rect x={MARGIN_LEFT - 16} y={MARGIN_TOP - 16} width={boardWidth + 32} height={boardHeightActual + 32} rx="12" ry="12" fill={`url(#${overlayId})`} />
 
                 {/* Inlay markers */}
                 {fretLines.slice(0, -1).map((_, i) => {
-                    const actualFret = clampedStart + i;
+                    const actualFret = start + i;
                     const y = fretY(i) + fretSpacing / 2;
                     if (DOUBLE_DOT_FRETS.includes(actualFret)) {
                         return (
@@ -169,7 +171,7 @@ export default function Fretboard({
                 {/* Fret lines */}
                 {fretLines.map((_, i) => {
                     const y = fretY(i);
-                    const isNut = clampedStart === 0 && i === 0;
+                    const isNut = hasNut && i === 0;
                     if (isNut) {
                         return <rect key={`fret-${i}`} x={MARGIN_LEFT - 14} y={y - 8} width={boardWidth + 28} height={8} rx="2" fill="url(#nutGradient2)" />;
                     }
@@ -188,10 +190,52 @@ export default function Fretboard({
                           strokeWidth={STRING_THICKNESSES[s - 1]} opacity="0.9" />
                 ))}
 
+                {/* Fret labels */}
+                {Array.from({ length: frets }, (_, i) => {
+                    const fretNum = start + i;
+                    if (fretNum < 1) return null;
+                    const y = fretY(i) + fretSpacing / 2;
+                    return (
+                        <text
+                            key={`label-${i}`}
+                            x={MARGIN_LEFT - 20}
+                            y={y}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            transform={`rotate(-90, ${MARGIN_LEFT - 24}, ${y})`}
+                            fontSize={11}
+                            fill={cfg.fretLabelColor}
+                            fontFamily="sans-serif"
+                        >
+                            {fretNum}
+                        </text>
+                    );
+                })}
+
+                {/* Nut notes */}
+                {hasNut && Array.from({ length: NUM_STRINGS }, (_, si) => si + 1).map((s) => {
+                    const noteNames = FRETBOARD[s]?.[0];
+                    if (!noteNames) return null;
+                    const noteName = noteNames[0];
+                    if (!scaleNotes.includes(noteName)) return null;
+                    const isRoot = noteName === musicKey;
+                    const x = stringX(s);
+                    const y = fretY(0) - 3;
+                    const r = 14;
+                    return (
+                        <g key={`open-${s}`}>
+                            <circle cx={x + 1} cy={y + 2} r={r} fill="#000000" opacity="0.25" />
+                            <circle cx={x} cy={y} r={r} fill={isRoot ? "url(#rootNoteGrad)" : `url(#${regNoteId})`} />
+                            <circle cx={x} cy={y} r={r} fill="url(#noteGlow)" />
+                            <circle cx={x} cy={y} r={r} fill="none" stroke={isRoot ? "#2A7F7F" : cfg.noteBorder} strokeWidth="1.5" opacity="0.8" />
+                        </g>
+                    );
+                })}
+
                 {/* Notes */}
                 {Array.from({ length: NUM_STRINGS }, (_, si) => si + 1).flatMap((s) =>
-                    Array.from({ length: clampedFrets }, (_, fi) => {
-                        const fret = clampedStart + fi;
+                    Array.from({ length: frets }, (_, fi) => {
+                        const fret = start + fi;
                         const noteNames = FRETBOARD[s]?.[fret];
                         if (!noteNames) return null;
                         const noteName = noteNames[0];
