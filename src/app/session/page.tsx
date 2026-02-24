@@ -102,7 +102,7 @@ function SessionContent() {
                 {/* Fretboard or placeholder */}
                 {showFretboard ? (
                     <Fretboard
-                        startFret={7}
+                        startFret={0}
                         numFrets={5}
                         wood={wood}
                     />

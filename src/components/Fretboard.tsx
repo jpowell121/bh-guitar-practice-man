@@ -34,7 +34,7 @@ const WOOD_CONFIGS = {
         ],
         stringColor: "#C8B89A",
         woundStringColor: "#B0A07A",
-        fretLabelColor: "#C8A87A",
+        fretLabelColor: "#555555",
         noteRegularFrom: "#E8E0D0",
         noteRegularTo: "#B8A888",
         noteBorder: "#8A7A60",
@@ -53,7 +53,7 @@ const WOOD_CONFIGS = {
         ],
         stringColor: "#8A7A60",
         woundStringColor: "#7A6A50",
-        fretLabelColor: "#A07830",
+        fretLabelColor: "#555555",
         noteRegularFrom: "#6B5A3A",
         noteRegularTo: "#4A3A22",
         noteBorder: "#6B5A3A",
@@ -65,7 +65,7 @@ export default function Fretboard({
                                        numFrets,
                                        wood = "rosewood",
                                        musicKey = "C",
-                                       scaleType = "Min6Dim",
+                                       scaleType = "Major",
                                        enharmonic = "flat",
                                    }: FretboardProps) {
     const SVG_WIDTH = 360;
@@ -187,6 +187,28 @@ export default function Fretboard({
                           stroke={s <= 3 ? cfg.stringColor : cfg.woundStringColor}
                           strokeWidth={STRING_THICKNESSES[s - 1]} opacity="0.9" />
                 ))}
+
+                {/* Fret labels */}
+                {Array.from({ length: clampedFrets }, (_, i) => {
+                    const fretNum = clampedStart + i;
+                    if (fretNum < 1) return null;
+                    const y = fretY(i) + fretSpacing / 2;
+                    return (
+                        <text
+                            key={`label-${i}`}
+                            x={MARGIN_LEFT - 20}
+                            y={y}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            transform={`rotate(-90, ${MARGIN_LEFT - 24}, ${y})`}
+                            fontSize={11}
+                            fill={cfg.fretLabelColor}
+                            fontFamily="sans-serif"
+                        >
+                            {fretNum}
+                        </text>
+                    );
+                })}
 
                 {/* Notes */}
                 {Array.from({ length: NUM_STRINGS }, (_, si) => si + 1).flatMap((s) =>
